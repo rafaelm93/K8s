@@ -55,3 +55,136 @@ kubectl wait --namespace ingress-nginx \
 
 No comando acima, estamos aguardando que os pods do Ingress Controller estejam prontos, com o label app.kubernetes.io/component=controller, no namespace ingress-nginx. Caso não estejam prontos em 90 segundos, o comando irá falhar.
 
+# Configurando Ingress Controller em Diferentes Ambientes Kubernetes
+
+## Minikube
+
+Para instalar o Ingress Controller no Minikube, você pode usar o sistema de addons do próprio Minikube. Execute o seguinte comando:
+
+```bash
+minikube addons enable ingress
+```
+## MicroK8s
+No MicroK8s, o Ingress Controller também pode ser instalado via sistema de addons. Use o seguinte comando:
+```bash
+microk8s enable ingress
+```
+## AWS (Amazon Web Services)
+Na AWS, o Ingress Controller é exposto por meio de um Network Load Balancer (NLB). O comando para instalação é:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/aws/deploy.yaml
+```
+também pode ser configurado a terminação TLS no Load Balancer da AWS, editando o arquivo deploy.yaml com as informações do seu Certificate Manager (ACM).
+
+## Azure
+No Azure, o Ingress Controller é instalado com o comando:
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
+```
+## GCP (Google Cloud Platform)
+No GCP, primeiro certifique-se de que seu usuário tem permissões de cluster-admin. Depois, instale o Ingress Controller com:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
+```
+## Bare Metal
+Para instalações em Bare Metal ou VMs "cruas", você pode usar um NodePort para testes rápidos:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/baremetal/deploy.yaml
+```
+
+## app-deployment.yaml
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: giropops-senhas
+  name: giropops-senhas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: giropops-senhas
+  template:
+    metadata:
+      labels:
+        app: giropops-senhas
+    spec:
+      containers:
+      - image: linuxtips/giropops-senhas:1.0
+        name: giropops-senhas
+        env:
+        - name: REDIS_HOST
+          value: redis-service
+        ports:
+        - containerPort: 5000
+        imagePullPolicy: Always
+```
+## app-service.yaml
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: giropops-senhas
+  labels:
+    app: giropops-senhas
+spec:
+  selector:
+    app: giropops-senhas
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      name: tcp-app
+  type: ClusterIP
+```
+## redis-deployment.yaml
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: redis
+  name: redis-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - image: redis
+        name: redis
+        ports:
+          - containerPort: 6379
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+```
+## redis-service.yaml
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+  type: ClusterIP
+
+```
