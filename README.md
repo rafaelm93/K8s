@@ -53,23 +53,33 @@ Para referência futura, abaixo estão os comandos Kubernetes para a criação d
 
 ```bash
 # 1. Criar certificado
+```bash
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /root/manifests/nginx.key -out /root/manifests/nginx.crt
+```
 
 # 2. info
+```bash
 AU br
 full name: ce
 state province: name ce
 localy name: fortaleza
 Organization name: pick
 Organization Unit: TI
+```
+
 # 3. Criar Secret
+```bash
 kubectl create secret tls nginx-secret --cert=/root/manifests/nginx.crt --key=/root/manifests/nginx.key
+```
 
 # 4. Verificar secret
+```bash
 k get secret
 k get secret nginx-secret -o yaml
+```
 
 # 5. Criar nginx.conf
+```bash
 events { } # configuração de eventos
 
 http { # configuração do protocolo HTTP, que é o protocolo que o Nginx vai usar
@@ -86,13 +96,17 @@ http { # configuração do protocolo HTTP, que é o protocolo que o Nginx vai us
     } 
   }
 }
+```
 
 #6. Criar Configmap
 
+```bash
 kubectl create configmap nginx-config --from-file=nginx.conf
+```
 
 ou 
 
+```bash
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -115,15 +129,17 @@ data:
         }
       }
     }
+```
 
 #7. Verificar Configmap
+```bash
 k get configmap
 k describe configmap nginx-config
 k get configmap -o yaml
 k get configmap nginx-config -o > configmap.yaml
-
+```
 #8. Utilizando configmap dentro do pod
-
+```bash
 apiVersion: v1
 kind: Pod
 metadata:
@@ -155,12 +171,32 @@ spec:
           path: nginx.crt
         - key: tls.key
           path: nginx.key
+```
 
 # 9. Verificar pod
+```bash
 k describe pods nginx-service
+```
 
-# 10. Expondo nginx
+# 10. Criar Service
+```bash
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx-https
+  ports:
+    - protocol: TCP
+      port: 32400  # Porta NodePort
+      targetPort: 443  # Porta do Pod
+  type: NodePort
+```
+# 11. Expondo nginx
+```bash
 k expose pods nginx-service
 k get svc
 k port-forward services/nginx-service 4443:443
 curl -k https://localhost:4443
+```
