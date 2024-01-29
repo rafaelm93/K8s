@@ -131,6 +131,7 @@ data:
 ```
 
 # 7. Verificar Configmap
+nginx-config.yaml
 ```bash
 k get configmap
 k describe configmap nginx-config
@@ -138,6 +139,7 @@ k get configmap -o yaml
 k get configmap nginx-config -o > configmap.yaml
 ```
 # 8. Utilizando configmap dentro do pod
+nginx-https-pod.yaml
 ```bash
 apiVersion: v1
 kind: Pod
@@ -178,6 +180,8 @@ k describe pods nginx-service
 ```
 
 # 10. Criar Service
+nginx-service.yaml
+
 ```bash
 apiVersion: v1
 kind: Service
