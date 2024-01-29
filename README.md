@@ -162,5 +162,5 @@ k describe pods nginx-service
 # 10. Expondo nginx
 k expose pods nginx-service
 k get svc
-k port-forward services/nginx-pod 4443:443
+k port-forward services/nginx-service 4443:443
 curl -k https://localhost:4443
