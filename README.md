@@ -51,7 +51,6 @@ Neste desafio, o objetivo é configurar o Nginx com HTTPS em um cluster Kubernet
 
 Para referência futura, abaixo estão os comandos Kubernetes para a criação do certificado e do Secret:
 
-```bash
 # 1. Criar certificado
 ```bash
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /root/manifests/nginx.key -out /root/manifests/nginx.crt
