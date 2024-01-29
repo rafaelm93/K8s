@@ -157,10 +157,10 @@ spec:
           path: nginx.key
 
 # 9. Verificar pod
-k describe pods nginx-https
+k describe pods nginx-service
 
 # 10. Expondo nginx
-k expose pods nginx-https
+k expose pods nginx-service
 k get svc
 k port-forward services/nginx-pod 4443:443
 curl -k https://localhost:4443
