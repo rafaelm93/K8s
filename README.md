@@ -47,7 +47,7 @@ Neste desafio, o objetivo é configurar o Nginx com HTTPS em um cluster Kubernet
 
 16. 🎯 O manifesto do Pod precisa se chamar `nginx-https-pod.yaml`.
 
-# K8s
+# Iniciando
 
 Para referência futura, abaixo estão os comandos Kubernetes para a criação do certificado e do Secret:
 
@@ -98,7 +98,7 @@ http { # configuração do protocolo HTTP, que é o protocolo que o Nginx vai us
 }
 ```
 
-#6. Criar Configmap
+# 6. Criar Configmap
 
 ```bash
 kubectl create configmap nginx-config --from-file=nginx.conf
@@ -131,14 +131,14 @@ data:
     }
 ```
 
-#7. Verificar Configmap
+# 7. Verificar Configmap
 ```bash
 k get configmap
 k describe configmap nginx-config
 k get configmap -o yaml
 k get configmap nginx-config -o > configmap.yaml
 ```
-#8. Utilizando configmap dentro do pod
+# 8. Utilizando configmap dentro do pod
 ```bash
 apiVersion: v1
 kind: Pod
