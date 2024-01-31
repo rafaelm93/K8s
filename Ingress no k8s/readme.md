@@ -101,21 +101,21 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: giropops-senhas
-  name: giropops-senhas
+    app: nginx
+  name: nginx
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: giropops-senhas
+      app: nginx
   template:
     metadata:
       labels:
-        app: giropops-senhas
+        app: nginx
     spec:
       containers:
-      - image: linuxtips/giropops-senhas:1.0
-        name: giropops-senhas
+      - image: nginx
+        name: nginx
         env:
         - name: REDIS_HOST
           value: redis-service
@@ -128,12 +128,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: giropops-senhas
+  name: nginx
   labels:
-    app: giropops-senhas
+    app: nginx
 spec:
   selector:
-    app: giropops-senhas
+    app: nginx
   ports:
     - protocol: TCP
       port: 5000
@@ -187,4 +187,51 @@ spec:
       targetPort: 6379
   type: ClusterIP
 
+```
+
+## Criando um Recurso de Ingress
+Agora, vamos criar um recurso de Ingress para nosso serviço nginx criado anteriormente. Crie um arquivo chamado ingress-01.yaml:
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /nginx
+        pathType: Prefix
+        backend:
+          service: 
+            name: nginx
+            port:
+              number: 5000
+```
+Criado o arquivo, aplique
+```bash
+kubectl apply -f ingress-01.yaml
+```
+Verificar ingress
+```bash
+kubectl get ingress
+```
+Para detalhar, use
+```bash
+kubectl describe ingress ingress-01
+```
+Para pegar o ip, use o seguinte comando
+```bash
+kubectl get ingress ingress-01 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+```
+caso seja um cluster gerenciado por algum provedor de nuvem, utilizar o seguinte comando.
+```bash
+kubectl get ingress ingress-1 -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+```
+Um cluster EKS, AKS, GCP, etc, o Ingress Controller cria um LoadBalancer, e o endereço IP do LoadBalancer será o endereço IP do seu Ingress
+para teste o hostname ou o LB, utilizar o seguinte comando.
+```bash
+curl ENDEREÇO_DO_INGRESS/nginx
 ```
